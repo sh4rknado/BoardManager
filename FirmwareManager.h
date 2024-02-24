@@ -9,10 +9,11 @@
 class FirmwareManager {
   private:
     RemoteDebug* _debug;
+    const char* _hostname;
 
   public:
-    FirmwareManager(RemoteDebug* debug);
-    void SetupFirmware(const char* hostName, int port, bool auth, const char* password);
+    FirmwareManager(RemoteDebug* debug, const char* hostname);
+    void SetupFirmware(int port, bool auth, const char* password);
     void CheckFirmwareUpdate();
     void OnUpdateStart();
     void OnUpdateEnd();

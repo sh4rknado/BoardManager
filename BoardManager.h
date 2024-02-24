@@ -17,10 +17,11 @@ class BoardManager {
   public:
     BoardManager(const char* hostName);
     void SetupNTP(long timezone, byte daysavetime, const char* ntpServer1, const char* ntpServer2, const char* ntpServer3);
-    void SetupFirmware(const char* hostName, int port, bool auth, const char* password);
+    void SetupFirmware(int port, bool auth, const char* password);
     void SetupWiFi(const char* ssid, const char* password);
     void SetupFileSystem();
     void CheckFirmwareUpdate();
+    void CheckWiFiConnection();
     void Log(String msg);
     void CheckDebug();
 };

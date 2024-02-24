@@ -1,10 +1,11 @@
 #include "FirmwareManager.h"
 
-FirmwareManager::FirmwareManager(RemoteDebug* debug) {
+FirmwareManager::FirmwareManager(RemoteDebug* debug, const char* hostname) {
   _debug = debug;
+  _hostname = hostname;
 }
 
-void FirmwareManager::SetupFirmware(const char* hostName, int port, bool auth, const char* password) {
+void FirmwareManager::SetupFirmware(int port, bool auth, const char* password) {
   
   // Port defaults to 8266
   if (Utils::IsValidPort(port)) {
@@ -14,8 +15,8 @@ void FirmwareManager::SetupFirmware(const char* hostName, int port, bool auth, c
   }
 
   // Hostname defaults to esp8266-[ChipID]
-  if (Utils::StringIsNullOrEmpty(hostName)) {
-    ArduinoOTA.setHostname(hostName);
+  if (Utils::StringIsNullOrEmpty(_hostname)) {
+    ArduinoOTA.setHostname(_hostname);
   } else {
     ArduinoOTA.setHostname("esp8266" + Utils::GetChipId());
   }

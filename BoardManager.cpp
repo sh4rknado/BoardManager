@@ -6,7 +6,7 @@ BoardManager::BoardManager(const char* hostName) {
   _debug = new RemoteDebug();
   _debug->begin(hostName);
   
-  _firmware = new FirmwareManager(_debug);
+  _firmware = new FirmwareManager(_debug, hostName);
   _fileManager = new FileManager(_debug);
 }
 
@@ -19,8 +19,8 @@ void BoardManager::SetupNTP(long timezone, byte daysavetime, const char* ntpServ
   _debug->printf("\nNow is : %d-%02d-%02d %02d:%02d:%02d\n", (tmstruct.tm_year) + 1900, (tmstruct.tm_mon) + 1, tmstruct.tm_mday, tmstruct.tm_hour, tmstruct.tm_min, tmstruct.tm_sec);
 }
 
-void BoardManager::SetupFirmware(const char *hostName, int port, bool auth, const char *password) {
-  _firmware->SetupFirmware(hostName, port, auth, password);
+void BoardManager::SetupFirmware(int port, bool auth, const char *password) {
+  _firmware->SetupFirmware(port, auth, password);
 }
 
 void BoardManager::SetupFileSystem() {
@@ -30,6 +30,15 @@ void BoardManager::SetupFileSystem() {
 void BoardManager::SetupWiFi(const char* ssid, const char* password) {
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
+  
+  CheckWiFiConnection();
+
+  _debug->println("Ready");
+  _debug->println("IP address: ");
+  _debug->println(Utils::Utils::IpAddress2String(WiFi.localIP()));
+}
+
+void BoardManager::CheckWiFiConnection() {
 
   while (WiFi.waitForConnectResult() != WL_CONNECTED) {
     _debug->println("Connection Failed! Rebooting...");
@@ -37,9 +46,6 @@ void BoardManager::SetupWiFi(const char* ssid, const char* password) {
     ESP.restart();
   }
 
-  _debug->println("Ready");
-  _debug->println("IP address: ");
-  _debug->println(Utils::Utils::IpAddress2String(WiFi.localIP()));
 }
 
 void BoardManager::CheckFirmwareUpdate() {
