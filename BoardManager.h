@@ -4,26 +4,33 @@
 #include "Utils.h"
 #include "FirmwareManager.h"
 #include "FileManager.h"
+#include "MQTTBroker.h"
 #include <ESP8266WiFi.h>
 #include <WiFiUdp.h>
 #include <RemoteDebug.h>
+
 
 class BoardManager {
   private:
     FirmwareManager* _firmware;
     RemoteDebug* _debug;
     FileManager* _fileManager;
-
+    MQTTBroker* _mqttBroker;
+    
   public:
-    BoardManager(const char* hostName);
+    BoardManager(const char* hostName, const char* mqtt_user, const char* mqtt_password, int max_retries);
     void SetupNTP(long timezone, byte daysavetime, const char* ntpServer1, const char* ntpServer2, const char* ntpServer3);
     void SetupFirmware(int port, bool auth, const char* password);
     void SetupWiFi(const char* ssid, const char* password);
     void SetupFileSystem();
+    void SetupMQTTServer(const char* mqtt_host,int mqtt_port);
     void CheckFirmwareUpdate();
     void CheckWiFiConnection();
+    bool MQTTConnect();
+    void CheckMQTTConnection();
     void Log(String msg);
     void CheckDebug();
+    bool SendMQTTMessage(const char* topic, char* payload);
 };
 
 #endif
