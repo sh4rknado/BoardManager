@@ -1,11 +1,11 @@
 #include "FirmwareManager.h"
 
-FirmwareManager::FirmwareManager(RemoteDebug* debug, const char* hostname) {
+FirmwareManager::FirmwareManager(RemoteDebug* debug, FileManager* fileManager) {
   _debug = debug;
-  _hostname = hostname;
+  _fileManager = fileManager;
 }
 
-void FirmwareManager::SetupFirmware(int port, bool auth, const char* password) {
+void FirmwareManager::SetupFirmware(const char* hostname, int port, bool auth, const char* password) {
   
   // Port defaults to 8266
   if (Utils::IsValidPort(port)) {
@@ -15,8 +15,8 @@ void FirmwareManager::SetupFirmware(int port, bool auth, const char* password) {
   }
 
   // Hostname defaults to esp8266-[ChipID]
-  if (Utils::StringIsNullOrEmpty(_hostname)) {
-    ArduinoOTA.setHostname(_hostname);
+  if (Utils::StringIsNullOrEmpty(hostname)) {
+    ArduinoOTA.setHostname(hostname);
   } else {
     ArduinoOTA.setHostname("esp8266" + Utils::GetChipId());
   }
@@ -32,21 +32,21 @@ void FirmwareManager::SetupFirmware(int port, bool auth, const char* password) {
   ArduinoOTA.begin();
 }
 
-void FirmwareManager::CheckFirmwareUpdate() {
-  ArduinoOTA.handle();
-}
+void FirmwareManager::CheckFirmwareUpdate() { ArduinoOTA.handle(); }
 
 void FirmwareManager::OnUpdateStart() {
-  // NOTE: if updating FS this would be the place to unmount FS using FS.end()
   if (ArduinoOTA.getCommand() == U_FLASH) {
     _debug->println("Start updating sketch");
   } else {  // U_FS
+    _fileManager->UnMount();
     _debug->println("Start updating U_FS");
   }
 }
 
 void FirmwareManager::OnUpdateEnd() {
  _debug->println("\nEnd");
+ // remount file system
+ _fileManager->Mount();
 }
 
 void FirmwareManager::OnUpdateProgress(unsigned int progress, unsigned int total) {

@@ -33,8 +33,10 @@ void Utils::ReadBoardConfiguration(const char* configurationPath, FileManager* f
 
   if(fileManager->ReadJson(configurationPath, doc))
   {
+    const char* defaultHostname = "esp8266" + Utils::GetChipId();
+
     //general section
-    strlcpy(config.hostname, doc["hostname"] | "esp8266", sizeof(config.hostname));
+    strlcpy(config.hostname, doc["hostname"] | defaultHostname, sizeof(config.hostname));
     
     //wifi section
     strlcpy(config.wifi_name, doc["wifi_name"] | "", sizeof(config.wifi_name));
@@ -46,7 +48,7 @@ void Utils::ReadBoardConfiguration(const char* configurationPath, FileManager* f
     config.ota_auth = doc["ota_auth"] | true;
     
     // MQTT Section
-    strlcpy(config.mqtt_user, doc["mqtt_user"] | "esp8266", sizeof(config.mqtt_user));
+    strlcpy(config.mqtt_user, doc["mqtt_user"] | defaultHostname, sizeof(config.mqtt_user));
     strlcpy(config.mqtt_password, doc["mqtt_password"] | "admin", sizeof(config.mqtt_password));
     strlcpy(config.mqtt_host, doc["mqtt_host"] | "", sizeof(config.mqtt_host));
     config.mqtt_port = doc["mqtt_port"] | 8080;

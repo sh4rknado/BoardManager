@@ -1,29 +1,30 @@
 #include "MQTTBroker.h"
 
-MQTTBroker::MQTTBroker(RemoteDebug* debug, const char* hostname, const char* mqtt_user, const char* mqtt_password, int max_retries) {
+MQTTBroker::MQTTBroker(RemoteDebug* debug) {
   WiFiClient espClient;
   _mqttClient = new PubSubClient(espClient);
   _debug = debug;
-  _hostname = hostname;
-  _mqtt_user = mqtt_user;
-  _mqtt_password = mqtt_password;
-  _max_retries = max_retries;
 }
 
-void MQTTBroker::SetupMQTTRemoteServer(const char* mqtt_host,int mqtt_port) { _mqttClient->setServer(mqtt_host, mqtt_port); }
+void MQTTBroker::SetupMQTTRemoteServer(Config* config) 
+{ 
+  _config = config;
+  _mqttClient->setServer(_config->mqtt_host, _config->mqtt_port);
+  Connect(); 
+}
 
 bool MQTTBroker::IsConnected() { return _mqttClient->connected(); }
 
 bool MQTTBroker::Connect() {
-
-  if(_mqttClient->connect(_hostname, _mqtt_user, _mqtt_password)) {
-    char topic[strlen(_hostname) + strlen("/status")];
-    strcpy(topic, _hostname);
+    
+  if(_mqttClient->connect(_config->hostname, _config->mqtt_user, _config->mqtt_password)) {
+    char topic[strlen(_config->hostname) + strlen("/status")];
+    strcpy(topic, _config->hostname);
     strcat(topic, "/status");
     puts (topic);
     
-    char msg[strlen(_hostname) + strlen("connected: ")];
-    strcpy(msg, _hostname);
+    char msg[strlen(_config->hostname) + strlen("connected: ")];
+    strcpy(msg, _config->hostname);
     strcat(msg, "connected: ");
     puts (msg);
 
@@ -38,11 +39,11 @@ bool MQTTBroker::Connect() {
 
 void MQTTBroker::Reconnect() {
 
-  _number_retries = 0;
+  int number_retries = 0;
   while(!IsConnected())
   {
-    _number_retries++;
-    if(_number_retries > _max_retries && !Connect())
+    number_retries++;
+    if(number_retries > _config->max_retries && !Connect())
     {      
       _debug->println("Connection to MQTT Failed! Rebooting...");
       delay(5000);
@@ -51,7 +52,6 @@ void MQTTBroker::Reconnect() {
     
     delay(1000); // wait 1 second for reconnect
   }
-
 }
 
 void MQTTBroker::CheckConnection() {
@@ -69,5 +69,6 @@ bool MQTTBroker::SendMQTTMessage(const char* topic, char* payload) {
     _debug->println("Can't send the message, because mqttClient is not connected");
     return false;
   }
-    return _mqttClient->publish(topic, payload, false);
+
+  return _mqttClient->publish(topic, payload, false);
 }

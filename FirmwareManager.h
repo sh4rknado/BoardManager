@@ -5,15 +5,16 @@
 #include <ESP8266mDNS.h>
 #include <ArduinoOTA.h>
 #include <RemoteDebug.h>
+#include "FileManager.h"
 
 class FirmwareManager {
   private:
     RemoteDebug* _debug;
-    const char* _hostname;
+    FileManager* _fileManager;
 
   public:
-    FirmwareManager(RemoteDebug* debug, const char* hostname);
-    void SetupFirmware(int port, bool auth, const char* password);
+    FirmwareManager(RemoteDebug* debug, FileManager* fileManager);
+    void SetupFirmware(const char* hostname, int port, bool auth, const char* password);
     void CheckFirmwareUpdate();
     void OnUpdateStart();
     void OnUpdateEnd();

@@ -2,19 +2,36 @@
 
 #include "BoardManager.h"
 
-BoardManager::BoardManager(const char* hostName, const char* mqtt_user, const char* mqtt_password, int max_retries) {
-  _debug = new RemoteDebug();
-  _debug->begin(hostName);
-  
+BoardManager::BoardManager() {
+  _debug = new RemoteDebug();  
   _fileManager = new FileManager(_debug);
-  _firmware = new FirmwareManager(_debug, hostName);
-  _mqttBroker = new MQTTBroker(_debug, hostName, mqtt_user, mqtt_password, max_retries);  
+  _firmware = new FirmwareManager(_debug, _fileManager);
+  _mqttBroker = new MQTTBroker(_debug);  
 }
 
 // #################################################### < SETUP REGION > ###########################################################
 
 void BoardManager::Setup() {
+  // mount file system
+  _fileManager->Mount(); 
+
+  // read config
+  Utils::ReadBoardConfiguration("/config.json", _fileManager, *_config);
   
+  // setup telnet debug
+  _debug->begin(_config->hostname);
+
+  // setup firmware OTA
+  _firmware->SetupFirmware(_config->hostname, _config->ota_port, _config->ota_auth, _config->password_ota);
+  
+  // setup wifi configuration
+  SetupWiFi(_config->wifi_name, _config->wifi_password);
+  
+  // setup NTP configuration (used by file system)
+  SetupNTP(_config->timezone, _config->daysavetime, _config->ntp_server_1, _config->ntp_server_2, _config->ntp_server_3);
+
+  // setup MQTT server
+  _mqttBroker->SetupMQTTRemoteServer(_config);
 }
 
 void BoardManager::SetupNTP(long timezone, byte daysavetime, const char* ntpServer1, const char* ntpServer2, const char* ntpServer3) {
@@ -36,12 +53,6 @@ void BoardManager::SetupWiFi(const char* ssid, const char* password) {
   _debug->println("IP address: ");
   _debug->println(Utils::Utils::IpAddress2String(WiFi.localIP()));
 }
-
-void BoardManager::SetupFirmware(int port, bool auth, const char *password) { _firmware->SetupFirmware(port, auth, password); }
-
-void BoardManager::SetupMQTTServer(const char* mqtt_host,int mqtt_port) { _mqttBroker->SetupMQTTRemoteServer(mqtt_host, mqtt_port); }
-
-void BoardManager::SetupFileSystem() { _fileManager->Mount(); }
 
 // #################################################### < CHECK REGION > ###########################################################
 
