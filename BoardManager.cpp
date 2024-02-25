@@ -16,7 +16,7 @@ void BoardManager::Setup() {
   _fileManager->Mount(); 
 
   // read config
-  Utils::ReadBoardConfiguration("/config.json", _fileManager, *_config);
+  Utils::ReadBoardConfiguration("/config.json", _fileManager, _config);
   
   // setup wifi configuration
   //SetupWiFi(_config->wifi_name, _config->wifi_password);

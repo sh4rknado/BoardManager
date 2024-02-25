@@ -13,8 +13,8 @@ class Utils {
     static bool StringIsNullOrEmpty(const char* str);
     static int GetChipId();
     static String IpAddress2String(const IPAddress& ipAddress);
-    static void SaveBoardConfiguration(const char* configurationPath, FileManager* fileManager, const Config& config);
     static void ReadBoardConfiguration(const char* configurationPath, FileManager* fileManager, Config& config);
+    static void SaveBoardConfiguration(const char* configurationPath, FileManager* fileManager, const Config& config);
 };
 
 #endif

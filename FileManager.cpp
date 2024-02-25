@@ -65,34 +65,34 @@ void FileManager::ListDir(const char *dirname) {
 void FileManager::PrintFile(const char *path) {
   
   if(!isMount) {
-    _debug->println("File system is not mount, please mount before use...");
+    Serial.println("File system is not mount, please mount before use...");
     return;
   }
 
-  _debug->printf("Reading file: %s\n", path);
+  Serial.printf("Reading file: %s\n", path);
 
   File file = LittleFS.open(path, "r");
   if (!file) {
-    _debug->println("Failed to open file for reading");
+    Serial.println("Failed to open file for reading");
     return;
   }
 
-  _debug->println("Read from file: ");
-  while (file.available()) { _debug->print(file.read()); }
+  Serial.println("Read from file: ");
+  while (file.available()) { Serial.print(file.read()); }
   file.close();
 }
 
 bool FileManager::OpenFileWrite(const char* path, File& file) {
   if(!isMount) {
-    _debug->println("File system is not mount, please mount before use...");
+    Serial.println("File system is not mount, please mount before use...");
     return false;
   }
 
-  _debug->printf("Writing file: %s\n", path);
+  Serial.printf("Writing file: %s\n", path);
   file = LittleFS.open(path, "w");
 
   if (!file) {
-    _debug->println("Failed to open file for writing");
+    Serial.println("Failed to open file for writing");
     return false;
   }
 
@@ -178,9 +178,9 @@ bool FileManager::Exists(const char* path) {
   }
   
   File file;
-  bool fileExists = !ReadFile(path, file);
+  bool fileExists = ReadFile(path, file); 
   file.close();
-  
+
   return fileExists; 
 }
 
@@ -219,8 +219,9 @@ bool FileManager::ReadJson(const char* configPath, JsonDocument& doc) {
 
  // Guard error during deserialize to json
  if (error) {
-   Serial.println("Error during json deserialize");
    jsonFile.close(); // close the file
+   Serial.println("Error during json deserialize");
+   PrintFile(configPath);
    return false;
  }
  
@@ -231,22 +232,29 @@ bool FileManager::ReadJson(const char* configPath, JsonDocument& doc) {
 bool FileManager::WriteJson(const char* configPath, JsonDocument& doc) {
   
   // Delete existing file, otherwise the configuration is appended to the file
-  if(LittleFS.exists(configPath) && !DeleteFile(configPath)) {
+  if(Exists(configPath) && !DeleteFile(configPath)) {
     Serial.println("Cannot create default configuration");
     return false;
   }
 
-  File file;
-
+  Serial.printf("Writing file: %s\n", configPath);
+  File file = LittleFS.open(configPath, "w");
+  
   // Serialize JSON to file
-  if(!OpenFileWrite(configPath, file) && serializeJson(doc, file) == 0)
-  {
+  if(serializeJson(doc, file) == 0){
     Serial.println("Failed to write to file");
     file.close();
     return false;
   }
-  
+
   delay(2000);  // Make sure the CREATE and LASTWRITE times are different
+  
+  Serial.println("Read doc json");
+  Serial.printf(doc["hostname"]);
+
+  Serial.println("\nRead from file: ");
+  while (file.available()) { Serial.print(file.read()); }
+
   file.close(); // Close the file
   Serial.println("Default json configuration is saved");
   return true;

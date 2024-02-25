@@ -5,28 +5,28 @@
 
 struct Config {
   // General Section
-  char* hostname;
+  const char* hostname;
 
   // Wifi Section
-  char* wifi_name;
-  char* wifi_password;
+  const char* wifi_name;
+  const char* wifi_password;
   
   // OTA SECTION
-  char* password_ota;
+  const char* password_ota;
   bool ota_auth;
   int ota_port;
 
   // MQTT section
-  char* mqtt_user;
-  char* mqtt_password;
-  char* mqtt_host;
+  const char* mqtt_user;
+  const char* mqtt_password;
+  const char* mqtt_host;
   int mqtt_port;
   int max_retries;
 
   // NTP Section
-  char* ntp_server_1;
-  char* ntp_server_2; 
-  char* ntp_server_3;
+  const char* ntp_server_1;
+  const char* ntp_server_2; 
+  const char* ntp_server_3;
   long timezone;
   byte daysavetime;
 };

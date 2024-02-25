@@ -16,7 +16,7 @@ class BoardManager {
     FirmwareManager* _firmware;
     MQTTBroker* _mqttBroker;
     FileManager* _fileManager;
-    Config* _config;
+    Config _config;
     
   public:
     BoardManager();
