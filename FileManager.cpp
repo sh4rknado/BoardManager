@@ -176,12 +176,8 @@ bool FileManager::Exists(const char* path) {
     Serial.println("File system is not mount, please mount before use...");
     return false;
   }
-  
-  File file;
-  bool fileExists = ReadFile(path, file); 
-  file.close();
 
-  return fileExists; 
+  return LittleFS.exists(path); 
 }
 
 bool FileManager::ReadFile(const char* path, File& file) {
@@ -229,7 +225,7 @@ bool FileManager::ReadJson(const char* configPath, JsonDocument& doc) {
  return true;
 }
 
-bool FileManager::WriteJson(const char* configPath, JsonDocument& doc) {
+bool FileManager::WriteJson(const char* configPath, JsonDocument doc) {
   
   // Delete existing file, otherwise the configuration is appended to the file
   if(Exists(configPath) && !DeleteFile(configPath)) {
@@ -237,9 +233,11 @@ bool FileManager::WriteJson(const char* configPath, JsonDocument& doc) {
     return false;
   }
 
-  Serial.printf("Writing file: %s\n", configPath);
   File file = LittleFS.open(configPath, "w");
   
+  // debug Serialize
+  // serializeJson(doc, Serial);
+
   // Serialize JSON to file
   if(serializeJson(doc, file) == 0){
     Serial.println("Failed to write to file");
@@ -248,14 +246,6 @@ bool FileManager::WriteJson(const char* configPath, JsonDocument& doc) {
   }
 
   delay(2000);  // Make sure the CREATE and LASTWRITE times are different
-  
-  Serial.println("Read doc json");
-  Serial.printf(doc["hostname"]);
-
-  Serial.println("\nRead from file: ");
-  while (file.available()) { Serial.print(file.read()); }
-
   file.close(); // Close the file
-  Serial.println("Default json configuration is saved");
   return true;
 }

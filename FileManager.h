@@ -26,7 +26,7 @@ class FileManager {
     bool DeleteFile(const char* path);
     bool ReadFile(const char* path, File& file);
     bool ReadJson(const char* configPath, JsonDocument& doc);
-    bool WriteJson(const char* configPath, JsonDocument& doc);
+    bool WriteJson(const char* configPath, JsonDocument doc);
 
 };
 #endif

@@ -32,9 +32,6 @@ String Utils::IpAddress2String(const IPAddress& ipAddress) {
 void Utils::ReadBoardConfiguration(const char* configurationPath, FileManager* fileManager, Config& config) {
   JsonDocument doc; // Allocate a temporary JsonDocument
 
-  // for debug Json
-  fileManager->DeleteFile(configurationPath);
-
   if(!fileManager->Exists(configurationPath)) {
     
     Serial.println("Configuration not found, default configuration will be used");
@@ -68,6 +65,9 @@ void Utils::ReadBoardConfiguration(const char* configurationPath, FileManager* f
     SaveBoardConfiguration(configurationPath, fileManager, config);
   }
   else if(fileManager->ReadJson(configurationPath, doc)) {
+    
+    Serial.println("Configuration found, read configuration...");
+
     //general section
     config.hostname = doc["hostname"] | "esp8266";
     
@@ -93,6 +93,9 @@ void Utils::ReadBoardConfiguration(const char* configurationPath, FileManager* f
     config.ntp_server_3 = doc["ntp_server_3"] | "3.be.pool.ntp.org";
     config.timezone = doc["timezone"] | 0;
     config.daysavetime = doc["daysavetime"] | 1;
+
+    // debug json serialize
+    // serializeJson(doc, Serial);
   }
 }
 
@@ -128,5 +131,4 @@ void Utils::SaveBoardConfiguration(const char* configurationPath, FileManager* f
   Serial.println("Write default configuration...");
   fileManager->WriteJson(configurationPath, doc);
   Serial.println("save configuration completed");
-  
 }
