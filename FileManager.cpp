@@ -62,7 +62,7 @@ void FileManager::ListDir(const char *dirname) {
   }
 }
 
-void FileManager::ReadFile(const char *path) {
+void FileManager::PrintFile(const char *path) {
   
   if(!isMount) {
     _debug->println("File system is not mount, please mount before use...");
@@ -82,25 +82,34 @@ void FileManager::ReadFile(const char *path) {
   file.close();
 }
 
-void FileManager::WriteFile(const char *path, const char *message) {
-  
+bool FileManager::OpenFileWrite(const char* path, File& file) {
   if(!isMount) {
     _debug->println("File system is not mount, please mount before use...");
-    return;
+    return false;
   }
 
   _debug->printf("Writing file: %s\n", path);
+  file = LittleFS.open(path, "w");
 
-  File file = LittleFS.open(path, "w");
   if (!file) {
     _debug->println("Failed to open file for writing");
-    return;
+    return false;
   }
-  if (file.print(message)) {
-    _debug->println("File written");
-  } else {
-    _debug->println("Write failed");
+
+  return true;
+}
+
+void FileManager::WriteFile(const char *path, const char *message) {
+  
+  File file;
+  if(OpenFileWrite(path, file)) {
+    if (file.print(message)) {
+      _debug->println("File written");
+    } else {
+      _debug->println("Write failed");
+    }  
   }
+
   delay(2000);  // Make sure the CREATE and LASTWRITE times are different
   file.close();
 }
@@ -142,20 +151,87 @@ void FileManager::RenameFile(const char *path1, const char *path2) {
   }
 }
 
-void FileManager::DeleteFile(const char *path) {
+bool FileManager::DeleteFile(const char *path) {
   
   if(!isMount) {
     _debug->println("File system is not mount, please mount before use...");
-    return;
+    return false;
   }
 
   _debug->printf("Deleting file: %s\n", path);
   
   if (LittleFS.remove(path)) {
     _debug->println("File deleted");
+    return true;
   } else {
     _debug->println("Delete failed");
+    return false;
   }
 
 }
 
+bool FileManager::ReadFile(const char *path, File& file) {
+
+  if(!isMount) {
+    _debug->println("File system is not mount, please mount before use...");
+    return false;
+  }
+
+  _debug->printf("Reading file: %s\n", path);
+  file = LittleFS.open(path, "r");
+  
+  if (!file) {
+    _debug->println("Failed to open file for reading");
+    return false;
+  }
+
+  return true;
+}
+
+bool FileManager::ReadJson(const char* configPath, JsonDocument& doc) {
+
+  //open file
+  File jsonFile = LittleFS.open(configPath, "r");
+  
+  //Guard can't open file
+  if(!jsonFile) {
+    _debug->printf("cannot open the file: %s", configPath);
+    jsonFile.close(); // close the file
+    return false;
+  }
+
+  // Deserialize the JSON document
+  DeserializationError error = deserializeJson(doc, jsonFile);
+
+ // Guard error during deserialize to json
+ if (error) {
+   _debug->println("Error during json deserialize");
+   jsonFile.close(); // close the file
+   return false;
+ }
+ 
+ jsonFile.close(); // close the file
+ return true;
+}
+
+bool FileManager::WriteJson(const char* configPath, JsonDocument& doc) {
+  
+  // Delete existing file, otherwise the configuration is appended to the file
+  if(LittleFS.exists(configPath) && !DeleteFile(configPath)){
+    return false;
+  }
+
+  File file;
+
+  // Serialize JSON to file
+  if(!OpenFileWrite(configPath, file) && serializeJson(doc, file) == 0)
+  {
+    _debug->println("Failed to write to file");
+    file.close();
+    return false;
+  }
+  
+  delay(2000);  // Make sure the CREATE and LASTWRITE times are different
+  file.close(); // Close the file
+  return true;
+}

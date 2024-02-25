@@ -4,6 +4,7 @@
 #include <FS.h>
 #include <LittleFS.h>
 #include <RemoteDebug.h>
+#include <ArduinoJson.h>
 
 class FileManager {
   private:
@@ -16,11 +17,15 @@ class FileManager {
     bool Mount();
     void Format();
     void ListDir(const char *dirname);
-    void ReadFile(const char *path);
+    void PrintFile(const char *path);
+    bool OpenFileWrite(const char* path, File& file);
     void WriteFile(const char *path, const char *message);
     void AppendFile(const char *path, const char *message);
     void RenameFile(const char *path1, const char *path2);
-    void DeleteFile(const char *path);
+    bool DeleteFile(const char *path);
+    bool ReadFile(const char *path, File& file);
+    bool ReadJson(const char* configPath, JsonDocument& doc);
+    bool WriteJson(const char* configPath, JsonDocument& doc);
 
 };
 #endif

@@ -6,12 +6,16 @@ BoardManager::BoardManager(const char* hostName, const char* mqtt_user, const ch
   _debug = new RemoteDebug();
   _debug->begin(hostName);
   
-  _firmware = new FirmwareManager(_debug, hostName);
   _fileManager = new FileManager(_debug);
-  _mqttBroker = new MQTTBroker(_debug, hostName, mqtt_user, mqtt_password, max_retries);
+  _firmware = new FirmwareManager(_debug, hostName);
+  _mqttBroker = new MQTTBroker(_debug, hostName, mqtt_user, mqtt_password, max_retries);  
 }
 
 // #################################################### < SETUP REGION > ###########################################################
+
+void BoardManager::Setup() {
+  
+}
 
 void BoardManager::SetupNTP(long timezone, byte daysavetime, const char* ntpServer1, const char* ntpServer2, const char* ntpServer3) {
   configTime(3600 * timezone, daysavetime * 3600, ntpServer1, ntpServer2, ntpServer3);
@@ -56,7 +60,6 @@ void BoardManager::CheckFirmwareUpdate() { _firmware->CheckFirmwareUpdate(); }
 void BoardManager::CheckDebug() { _debug->handle(); }
 
 void BoardManager::CheckMQTTConnection() { _mqttBroker->CheckConnection(); }
-
 
 // #################################################### < MQTT connection > ###########################################################
 

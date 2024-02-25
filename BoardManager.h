@@ -2,6 +2,7 @@
 #define BoardManager_h
 
 #include "Utils.h"
+#include "config.h"
 #include "FirmwareManager.h"
 #include "FileManager.h"
 #include "MQTTBroker.h"
@@ -9,16 +10,17 @@
 #include <WiFiUdp.h>
 #include <RemoteDebug.h>
 
-
 class BoardManager {
   private:
-    FirmwareManager* _firmware;
     RemoteDebug* _debug;
-    FileManager* _fileManager;
+    FirmwareManager* _firmware;
     MQTTBroker* _mqttBroker;
+    FileManager* _fileManager;
+    Config* _config;
     
   public:
     BoardManager(const char* hostName, const char* mqtt_user, const char* mqtt_password, int max_retries);
+    void Setup();
     void SetupNTP(long timezone, byte daysavetime, const char* ntpServer1, const char* ntpServer2, const char* ntpServer3);
     void SetupFirmware(int port, bool auth, const char* password);
     void SetupWiFi(const char* ssid, const char* password);
