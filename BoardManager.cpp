@@ -18,20 +18,21 @@ void BoardManager::Setup() {
   // read config
   Utils::ReadBoardConfiguration("/config.json", _fileManager, *_config);
   
+  // setup wifi configuration
+  //SetupWiFi(_config->wifi_name, _config->wifi_password);
+
   // setup telnet debug
-  _debug->begin(_config->hostname);
+  //_debug->begin(_config->hostname, RemoteDebug::ANY);
 
   // setup firmware OTA
-  _firmware->SetupFirmware(_config->hostname, _config->ota_port, _config->ota_auth, _config->password_ota);
+  //_firmware->SetupFirmware(_config->hostname, _config->ota_port, _config->ota_auth, _config->password_ota);
   
-  // setup wifi configuration
-  SetupWiFi(_config->wifi_name, _config->wifi_password);
   
   // setup NTP configuration (used by file system)
-  SetupNTP(_config->timezone, _config->daysavetime, _config->ntp_server_1, _config->ntp_server_2, _config->ntp_server_3);
+  //SetupNTP(_config->timezone, _config->daysavetime, _config->ntp_server_1, _config->ntp_server_2, _config->ntp_server_3);
 
   // setup MQTT server
-  _mqttBroker->SetupMQTTRemoteServer(_config);
+  //_mqttBroker->SetupMQTTRemoteServer(_config);
 }
 
 void BoardManager::SetupNTP(long timezone, byte daysavetime, const char* ntpServer1, const char* ntpServer2, const char* ntpServer3) {
@@ -49,9 +50,9 @@ void BoardManager::SetupWiFi(const char* ssid, const char* password) {
   
   CheckWiFiConnection();
 
-  _debug->println("Ready");
-  _debug->println("IP address: ");
-  _debug->println(Utils::Utils::IpAddress2String(WiFi.localIP()));
+  Serial.println("Ready");
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
 }
 
 // #################################################### < CHECK REGION > ###########################################################
@@ -59,7 +60,7 @@ void BoardManager::SetupWiFi(const char* ssid, const char* password) {
 void BoardManager::CheckWiFiConnection() {
 
   while (WiFi.waitForConnectResult() != WL_CONNECTED) {
-    _debug->println("Connection Failed! Rebooting...");
+    Serial.println("Connection Failed! Rebooting...");
     delay(5000);
     ESP.restart();
   }

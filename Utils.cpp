@@ -30,17 +30,47 @@ String Utils::IpAddress2String(const IPAddress& ipAddress) {
 
 void Utils::ReadBoardConfiguration(const char* configurationPath, FileManager* fileManager, Config& config) {
   JsonDocument doc; // Allocate a temporary JsonDocument
+  const char* defaultHostname = "esp8266" + Utils::GetChipId();
 
-  if(fileManager->ReadJson(configurationPath, doc))
-  {
-    const char* defaultHostname = "esp8266" + Utils::GetChipId();
+  if(!fileManager->Exists(configurationPath)) {
+    
+    Serial.print("Configuration not found, default configuration will be used");
 
+    //general section
+    strlcpy(config.hostname, defaultHostname, sizeof(config.hostname));
+    
+    //wifi section
+    strlcpy(config.wifi_name, "wifi_name", sizeof(config.wifi_name));
+    strlcpy(config.wifi_password, "wifi_password", sizeof(config.wifi_password));
+
+    // OTA Section
+    strlcpy(config.password_ota, "admin", sizeof(config.password_ota));
+    config.ota_port = 8266;
+    config.ota_auth = true;
+    
+    // MQTT Section
+    strlcpy(config.mqtt_user, defaultHostname, sizeof(config.mqtt_user));
+    strlcpy(config.mqtt_password, "admin", sizeof(config.mqtt_password));
+    strlcpy(config.mqtt_host, "192.168.1.200", sizeof(config.mqtt_host));
+    config.mqtt_port = 8080;
+    config.max_retries = 5;
+
+    // NTP Section
+    strlcpy(config.ntp_server_1, "1.be.pool.ntp.org" , sizeof(config.ntp_server_1));
+    strlcpy(config.ntp_server_2, "2.be.pool.ntp.org", sizeof(config.ntp_server_2));
+    strlcpy(config.ntp_server_3, "3.be.pool.ntp.org", sizeof(config.ntp_server_3));
+    config.timezone = 0;
+    config.daysavetime = 1;
+
+    SaveBoardConfiguration(configurationPath, fileManager, config);
+  }
+  else if(fileManager->ReadJson(configurationPath, doc)) {
     //general section
     strlcpy(config.hostname, doc["hostname"] | defaultHostname, sizeof(config.hostname));
     
     //wifi section
-    strlcpy(config.wifi_name, doc["wifi_name"] | "", sizeof(config.wifi_name));
-    strlcpy(config.wifi_password, doc["wifi_password"] | "", sizeof(config.wifi_password));
+    strlcpy(config.wifi_name, doc["wifi_name"] | "wifi_name", sizeof(config.wifi_name));
+    strlcpy(config.wifi_password, doc["wifi_password"] | "wifi_password", sizeof(config.wifi_password));
 
     // OTA Section
     strlcpy(config.password_ota, doc["password_ota"] | "admin", sizeof(config.password_ota));
@@ -50,18 +80,18 @@ void Utils::ReadBoardConfiguration(const char* configurationPath, FileManager* f
     // MQTT Section
     strlcpy(config.mqtt_user, doc["mqtt_user"] | defaultHostname, sizeof(config.mqtt_user));
     strlcpy(config.mqtt_password, doc["mqtt_password"] | "admin", sizeof(config.mqtt_password));
-    strlcpy(config.mqtt_host, doc["mqtt_host"] | "", sizeof(config.mqtt_host));
+    strlcpy(config.mqtt_host, doc["mqtt_host"] | "192.168.1.200", sizeof(config.mqtt_host));
     config.mqtt_port = doc["mqtt_port"] | 8080;
     config.max_retries = doc["max_retries"] | 5;
 
     // NTP Section
-    strlcpy(config.ntp_server_1, doc["ntp_server_1"] | "", sizeof(config.ntp_server_1));
-    strlcpy(config.ntp_server_2, doc["ntp_server_2"] | "", sizeof(config.ntp_server_2));
-    strlcpy(config.ntp_server_3, doc["ntp_server_3"] | "", sizeof(config.ntp_server_3));
+    strlcpy(config.ntp_server_1, doc["ntp_server_1"] | "1.be.pool.ntp.org", sizeof(config.ntp_server_1));
+    strlcpy(config.ntp_server_2, doc["ntp_server_2"] | "2.be.pool.ntp.org", sizeof(config.ntp_server_2));
+    strlcpy(config.ntp_server_3, doc["ntp_server_3"] | "3.be.pool.ntp.org", sizeof(config.ntp_server_3));
     config.timezone = doc["timezone"] | 0;
     config.daysavetime = doc["daysavetime"] | 1;
   }
-  
+
 }
 
 void Utils::SaveBoardConfiguration(const char* configurationPath, FileManager* fileManager, const Config& config) {
@@ -93,6 +123,7 @@ void Utils::SaveBoardConfiguration(const char* configurationPath, FileManager* f
   doc["timezone"] = config.timezone;
   doc["daysavetime"] = config.daysavetime;
 
+  Serial.println("Write default configuration...");
   fileManager->WriteJson(configurationPath, doc);
   
 }

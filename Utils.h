@@ -5,6 +5,7 @@
 #include "config.h"
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
+#include <ArduinoJson.h>
 
 class Utils {
   public:
