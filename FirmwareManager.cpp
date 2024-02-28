@@ -8,17 +8,17 @@ FirmwareManager::FirmwareManager(RemoteDebug* debug, FileManager* fileManager) {
 void FirmwareManager::SetupFirmware(const char* hostname, int port, bool auth, const char* password) {
   
   // Port defaults to 8266
-  if (Utils::IsValidPort(port)) {
+  if (IsValidPort(port)) {
     ArduinoOTA.setPort(port);
   } else {
     ArduinoOTA.setPort(8266);
   }
 
   // Hostname defaults to esp8266-[ChipID]
-  if (Utils::StringIsNullOrEmpty(hostname)) {
+  if (StringIsNullOrEmpty(hostname)) {
     ArduinoOTA.setHostname(hostname);
   } else {
-    ArduinoOTA.setHostname("esp8266" + Utils::GetChipId());
+    ArduinoOTA.setHostname("esp8266");
   }
 
   if (auth) {
@@ -75,4 +75,12 @@ void FirmwareManager::OnUpdateError(ota_error_t error) {
        _debug->println("Unknow error:" + String(error));
         break;
     }
+}
+
+bool FirmwareManager::IsValidPort(int port) {
+  return port > 0 && port < 65535;
+}
+
+bool FirmwareManager::StringIsNullOrEmpty(const char* str) {
+  return str == nullptr || *str == '\0';
 }

@@ -22,6 +22,7 @@ struct Config {
   const char* mqtt_host;
   int mqtt_port;
   int max_retries;
+  const char* PubTopic;
 
   // NTP Section
   const char* ntp_server_1;

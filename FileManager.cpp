@@ -249,3 +249,4 @@ bool FileManager::WriteJson(const char* configPath, JsonDocument doc) {
   file.close(); // Close the file
   return true;
 }
+

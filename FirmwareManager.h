@@ -1,7 +1,6 @@
 #ifndef FirmwareManager_h
 #define FirmwareManager_h
 
-#include "Utils.h"
 #include <ESP8266mDNS.h>
 #include <ArduinoOTA.h>
 #include <RemoteDebug.h>
@@ -20,6 +19,11 @@ class FirmwareManager {
     void OnUpdateEnd();
     void OnUpdateProgress(unsigned int progress, unsigned int total);
     void OnUpdateError(ota_error_t error);
+  
+  private:
+    bool IsValidPort(int port);
+    bool StringIsNullOrEmpty(const char* str);
+
 };
 
 #endif
