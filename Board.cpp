@@ -79,8 +79,8 @@ void Board::ReadBoardConfiguration(const char* configurationPath, FileManager* f
     config.hostname = doc["hostname"] | "esp8266";
     
     //wifi section
-    config.wifi_name = doc["wifi_name"] | "WiFi-2.4-DC03";
-    config.wifi_password = doc["wifi_password"] | "AC4635D555";
+    config.wifi_name = doc["wifi_name"] | "wifi";
+    config.wifi_password = doc["wifi_password"] | "pass";
 
     // OTA Section
     config.password_ota = doc["password_ota"] | "admin";
